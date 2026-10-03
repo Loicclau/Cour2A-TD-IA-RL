@@ -1,0 +1,7 @@
+numpy==2.5.1
+matplotlib==3.11.1
+Pillow==12.3.0
+CairoSVG==2.9.0
+
+# renomer en png les image si jamais sa marche pas
+# sear_tatat  enleve le truc underscore
