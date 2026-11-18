@@ -64,8 +64,8 @@ def _greedy(actions, values, gamma):
     best_action = None
     best_value = float("-inf")
 
-    for action in actions:
-        q_value = _q(action, values, gamma)
+    for action, outcomes in actions.items():
+        q_value = _q(outcomes, values, gamma)
 
         if q_value > best_value:
             best_value = q_value
@@ -92,13 +92,26 @@ def value_iteration(
         # TODO 3a: Apply one synchronous Bellman optimality update to
         # every state, using the *previous* values dictionary.
         # Store the resulting dictionary in `updated`.
-        raise NotImplementedError("TODO 3a: implement Bellman optimality updates")
+        updated = { s: max(
+                    _q(outcomes, values, gamma)
+                    for outcomes in transitions[s].values()
+                )
+                for s in mdp.states
+            }
 
         # TODO 3b: Compute the maximum absolute change in state values.
         # Store this scalar in `delta`.
+        delta = max(
+            abs(updated[s] - values[s])
+            for s in mdp.states
+        )
 
         # TODO 3c: Extract a greedy policy from the updated values.
         # Store the state-to-action mapping in `new_policy`.
+        new_policy = {
+            s: _greedy(transitions[s], updated, gamma)
+            for s in mdp.states
+        }
         changes = sum(new_policy[s] != policy[s] for s in mdp.states)
         values, policy = updated, new_policy
         record = {
@@ -150,14 +163,18 @@ def policy_iteration(
             # TODO 4a: Evaluate the current policy with a synchronous
             # Bellman expectation update for every state.
             # Compute `updated` and the maximum value change `delta`.
-            raise NotImplementedError("TODO 4a: implement policy evaluation")
+            updated = {s: _q(transitions[s][policy[s]], values, gamma) for s in mdp.states}
+            delta = max(abs(updated[s] - values[s]) for s in mdp.states)
             values = updated
             if delta < evaluation_epsilon:
                 evaluation_converged = True
                 break
         # TODO 4b: Improve the policy greedily with respect to `values`.
         # Store the new state-to-action mapping in `improved`.
-        raise NotImplementedError("TODO 4b: implement policy improvement")
+        improved = {
+            s: _greedy(transitions[s], values, gamma)
+            for s in mdp.states
+        }
         changes = sum(improved[s] != policy[s] for s in mdp.states)
         policy = improved
         record = {
